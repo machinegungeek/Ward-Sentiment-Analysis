@@ -163,7 +163,7 @@ def punct_space(word):
 	return word.is_punct or word.is_space
 
 #Make line plots of the total sentiment for selected characters, as a function of chapter.	
-def make_tot_score_graphs(tot_score_dict,subset=[],path=''):	
+def make_tot_score_graphs(tot_score_dict,subset=[],path='',chap_labels=[],suffix=''):	
 	num_chaps = len(tot_score_dict[tot_score_dict.keys()[0]])
 	if len(subset)==0:
 		subset = tot_score_dict.keys()
@@ -176,15 +176,19 @@ def make_tot_score_graphs(tot_score_dict,subset=[],path=''):
 	ax.set_xlabel('Chapter')
 	ax.set_ylabel('Total Sentiment')
 	#Having 100+ ticks and labels is too messy.
-	ax.set_xticks(np.arange(0,num_chaps,4))
-	ax.set_xticklabels([])
+	if len(chap_labels)==0:
+		ax.set_xticks(np.arange(0,num_chaps,4))
+		ax.set_xticklabels([])
+	else:
+		ax.set_xticks(range(len(chap_labels)))
+		ax.set_xticklabels(chap_labels)
 	ax.legend(fontsize='small')
 	ax.axhline(color='k')
-	fig.savefig(os.path.join(path,'total_sent_scores'))
+	fig.savefig(os.path.join(path,'total_sent_scores'+suffix))
 
 #Make line plots for chapter by chapter sentiment scores for selected characters.
 #Results are smoothed using a running average and exponential smoothing	
-def make_graphs(score_dict,subset=[],path=''):
+def make_graphs(score_dict,subset=[],path='',chap_labels=[],suffix=''):
 	num_chaps = len(score_dict[score_dict.keys()[0]])
 	if len(subset)==0:
 		subset = score_dict.keys()
@@ -194,11 +198,15 @@ def make_graphs(score_dict,subset=[],path=''):
 		ax.plot(score_dict[nm],label=nm)
 	ax.set_xlabel('Chapter')
 	ax.set_ylabel('Sentiment')
-	ax.set_xticks(np.arange(0,num_chaps,4))
-	ax.set_xticklabels([])
+	if len(chap_labels)==0:
+		ax.set_xticks(np.arange(0,num_chaps,4))
+		ax.set_xticklabels([])
+	else:
+		ax.set_xticks(range(len(chap_labels)))
+		ax.set_xticklabels(chap_labels)
 	ax.legend(fontsize='small')
 	ax.axhline(color='k')
-	fig.savefig(os.path.join(path,'ind_sent_scores'))
+	fig.savefig(os.path.join(path,'ind_sent_scores'+suffix))
 	
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
@@ -210,11 +218,15 @@ def make_graphs(score_dict,subset=[],path=''):
 		ax.plot(mean_smooth,label=nm)
 	ax.set_xlabel('Chapter')
 	ax.set_ylabel('Sentiment')
-	ax.set_xticks(np.arange(0,num_chaps,4))
-	ax.set_xticklabels([])
+	if len(chap_labels)==0:
+		ax.set_xticks(np.arange(0,num_chaps,4))
+		ax.set_xticklabels([])
+	else:
+		ax.set_xticks(range(len(chap_labels)))
+		ax.set_xticklabels(chap_labels)
 	ax.legend(fontsize='small')
 	ax.axhline(color='k')
-	fig.savefig(os.path.join(path,'mean_smoothed_sent_scores'))
+	fig.savefig(os.path.join(path,'mean_smoothed_sent_scores')+suffix)
 	
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
@@ -224,11 +236,15 @@ def make_graphs(score_dict,subset=[],path=''):
 		ax.plot(exp_smooth,label=nm)
 	ax.set_xlabel('Chapter')
 	ax.set_ylabel('Sentiment')
-	ax.set_xticks(np.arange(0,num_chaps,4))
-	ax.set_xticklabels([])
+	if len(chap_labels)==0:
+		ax.set_xticks(np.arange(0,num_chaps,4))
+		ax.set_xticklabels([])
+	else:
+		ax.set_xticks(range(len(chap_labels)))
+		ax.set_xticklabels(chap_labels)
 	ax.legend(fontsize='small')
 	ax.axhline(color='k')
-	fig.savefig(os.path.join(path,'exp_smooth_sent_scores'))
+	fig.savefig(os.path.join(path,'exp_smooth_sent_scores')+suffix)
 	
 #Grab sentiments by looking for keywords on a sentence by sentence basis.
 #name_dict contains character:[keywords] sets, and the sentiment analyzer
@@ -293,17 +309,17 @@ def whole_text_sent(texts,name_dict,nlp,sent_anal='textblob'):
 			tot_scores[kw].append(chap_sent_dict[kw])
 	return score_dict,tot_scores
 	
-def dumb_graph_script(sd_b,td_b,sd_v,td_v,dir='',subsets=[[],['Ashley','Rain','Chris'],['Sveta','Kenzie'],['Tattletale','Amy','Carol']],dir_names=['Full Graphs','ARC Graphs','Fem Graphs','Aux Graphs']):
+def dumb_graph_script(sd_b,td_b,sd_v,td_v,dir='',subsets=[[],['Ashley','Rain','Chris'],['Sveta','Kenzie'],['Tattletale','Amy','Carol']],dir_names=['Full Graphs','ARC Graphs','Fem Graphs','Aux Graphs'],chap_labels=[],suffix=''):
 	assert len(subsets) == len(dir_names)
 	for ss,dir_ in zip(subsets,dir_names):
 		d1 = os.path.join(dir,dir_)
 		d2 = os.path.join(dir,dir_+' v2')
 		if not os.path.isdir(d1):
 			os.mkdir(d1)
-		make_graphs(sd_b,path=d1,subset=ss)
-		make_tot_score_graphs(td_b,path=d1,subset=ss)
+		make_graphs(sd_b,path=d1,subset=ss,chap_labels=chap_labels,suffix=suffix)
+		make_tot_score_graphs(td_b,path=d1,subset=ss,chap_labels=chap_labels,suffix=suffix)
 		if not os.path.isdir(d2):
 			os.mkdir(d2)
-		make_graphs(sd_v,path=d2,subset=ss)
-		make_tot_score_graphs(td_v,path=d2,subset=ss)
+		make_graphs(sd_v,path=d2,subset=ss,chap_labels=chap_labels,suffix=suffix)
+		make_tot_score_graphs(td_v,path=d2,subset=ss,chap_labels=chap_labels,suffix=suffix)
 			
